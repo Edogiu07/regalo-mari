@@ -87,6 +87,10 @@ const App = () => {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false); // Nuovo stato per il fullscreen
 
+  // Stati per lo swipe su mobile
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
   // Array di immagini per la galleria (senza caption, ordine casuale con aura.jpg per ultimo)
   const galleryImages = [
     { src: "birs.jpg" },
@@ -104,6 +108,26 @@ const App = () => {
 
   const nextImage = () => setGalleryIndex((prev) => (prev + 1) % galleryImages.length);
   const prevImage = () => setGalleryIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+
+  // Gestione dello swipe su mobile per la galleria
+  const minSwipeDistance = 50;
+  
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) {
+      nextImage(); // Slide verso sinistra (prossima foto)
+    } else if (distance < -minSwipeDistance) {
+      prevImage(); // Slide verso destra (foto precedente)
+    }
+  };
 
   // Aggiorna l'orologio della taskbar
   useEffect(() => {
@@ -459,8 +483,13 @@ const App = () => {
                       </button>
                     )}
 
-                    {/* Contenitore Immagine con frecce */}
-                    <div className={`relative w-full overflow-hidden bg-black group shadow-md flex items-center justify-center ${isFullscreen ? 'h-full' : 'h-64 md:h-96 rounded-2xl border-4 border-white'}`}>
+                    {/* Contenitore Immagine con frecce e swipe */}
+                    <div 
+                      className={`relative w-full overflow-hidden bg-black group shadow-md flex items-center justify-center ${isFullscreen ? 'h-full' : 'h-64 md:h-96 rounded-2xl border-4 border-white'}`}
+                      onTouchStart={onTouchStart}
+                      onTouchMove={onTouchMove}
+                      onTouchEnd={onTouchEnd}
+                    >
                       
                       {/* Nastro scorrevole delle immagini */}
                       <div 
@@ -482,25 +511,25 @@ const App = () => {
                       {!isFullscreen && (
                         <button 
                           onClick={() => setIsFullscreen(true)}
-                          className="absolute right-2 md:right-4 top-2 md:top-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-lg backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+                          className="absolute right-2 md:right-4 top-2 md:top-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-lg backdrop-blur-sm transition-all shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 z-20"
                           title="Schermo intero"
                         >
                           <Maximize className="w-5 h-5" />
                         </button>
                       )}
                       
-                      {/* Pulsante Precedente */}
+                      {/* Pulsante Precedente (nascosto su mobile a favore dello swipe) */}
                       <button 
                         onClick={prevImage}
-                        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110 z-10"
+                        className="hidden md:block absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110 z-10"
                       >
                         <ChevronLeft className="w-6 h-6" />
                       </button>
                       
-                      {/* Pulsante Successivo */}
+                      {/* Pulsante Successivo (nascosto su mobile a favore dello swipe) */}
                       <button 
                         onClick={nextImage}
-                        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110 z-10"
+                        className="hidden md:block absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110 z-10"
                       >
                         <ChevronRight className="w-6 h-6" />
                       </button>
