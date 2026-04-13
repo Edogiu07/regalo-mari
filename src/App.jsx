@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Heart, Star, Sparkles, Camera, Coffee, Smile, Music, Gift, Lock, User, ArrowRight, X, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { Heart, Star, Sparkles, Camera, Coffee, Smile, Music, Gift, Lock, User, ArrowRight, X, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Maximize, Minimize } from 'lucide-react';
 
 // Stili personalizzati per le animazioni dei cuori fluttuanti
 const customStyles = `
@@ -85,19 +85,21 @@ const App = () => {
   
   // Stato per il carosello della galleria
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false); // Nuovo stato per il fullscreen
 
-  // Array di 10 immagini per la galleria (sostituisci i link 'src' con le tue foto reali!)
+  // Array di immagini per la galleria (senza caption, ordine casuale con aura.jpg per ultimo)
   const galleryImages = [
-    { src: "afnorth-mhs-mascot-grad.png", caption: "Un traguardo speciale da ricordare per sempre. Sei la mia leonessa! 🎓🦁" },
-    { src: "https://picsum.photos/seed/mari1/800/600", caption: "Il nostro primo viaggio insieme ✈️" },
-    { src: "https://picsum.photos/seed/mari2/800/600", caption: "Cene romantiche a lume di candela 🕯️" },
-    { src: "https://picsum.photos/seed/mari3/800/600", caption: "Passeggiate infinite mano nella mano 🌳" },
-    { src: "https://picsum.photos/seed/mari4/800/600", caption: "I tuoi abbracci sono il mio posto sicuro 🤗" },
-    { src: "https://picsum.photos/seed/mari5/800/600", caption: "Tramonti indimenticabili guardando il mare 🌅" },
-    { src: "https://picsum.photos/seed/mari6/800/600", caption: "Risate a crepapelle che mi riempiono il cuore 😂" },
-    { src: "https://picsum.photos/seed/mari7/800/600", caption: "Momenti di pura dolcezza 🍭" },
-    { src: "https://picsum.photos/seed/mari8/800/600", caption: "Sotto un cielo pieno di stelle ✨" },
-    { src: "https://picsum.photos/seed/mari9/800/600", caption: "Semplicemente perfetti insieme ❤️" }
+    { src: "public/birs.jpg" },
+    { src: "public/marispa.jpg" },
+    { src: "bacios.jpg" },
+    { src: "public/dorms.jpg" },
+    { src: "public/figa.jpg" },
+    { src: "public/romaspecchio.jpg" },
+    { src: "public/cols.jpg" },
+    { src: "public/bershka.jpg" },
+    { src: "public/duoms.jpg" },
+    { src: "public/boh.jpg" },
+    { src: "aura.jpg" }
   ];
 
   const nextImage = () => setGalleryIndex((prev) => (prev + 1) % galleryImages.length);
@@ -118,6 +120,15 @@ const App = () => {
       setError(true);
       setTimeout(() => setError(false), 3000); // L'errore scompare dopo 3 secondi
     }
+  };
+
+  const handleLogout = () => {
+    setIsUnlocked(false);
+    setPassword('');
+    setActiveApp(null);
+    setShowMessage(false);
+    setSurpriseHearts([]);
+    setIsFullscreen(false);
   };
 
   // Generatore di cuori fluttuanti
@@ -153,10 +164,14 @@ const App = () => {
     const numCols = window.innerWidth < 768 ? 15 : 30; // Più colonne su schermi grandi
     const columnHeights = new Array(numCols).fill(0);
     const newHearts = [];
+    
+    // Mix di emoji per la pioggia di fiori e cuori
+    const surpriseEmojis = ['❤️', '🌷', '🌷', '🌸', '💖']; // Più probabilità di avere tulipani e cuori
 
     for (let i = 0; i < numHearts; i++) {
       const col = Math.floor(Math.random() * numCols);
       const heartSize = Math.random() * 20 + 20; // grandezza tra 20px e 40px
+      const randomEmoji = surpriseEmojis[Math.floor(Math.random() * surpriseEmojis.length)];
       
       // Calcola l'altezza in base a quanti cuori ci sono già nella colonna
       // Moltiplicato per 0.45 crea un effetto di "sovrapposizione" realistico
@@ -171,7 +186,8 @@ const App = () => {
         bottom: `${bottomPos + 56}px`, // +56px per farli fermare sopra la barra delle applicazioni
         size: heartSize,
         delay: Math.random() * 3, // cadono sparpagliati nell'arco di 3 secondi
-        rotation: Math.random() * 60 - 30 // rotazione casuale
+        rotation: Math.random() * 60 - 30, // rotazione casuale
+        emoji: randomEmoji // Assegna l'emoji casuale calcolata prima
       });
     }
     setSurpriseHearts(newHearts);
@@ -195,7 +211,16 @@ const App = () => {
           
           {/* Avatar utente */}
           <div className="w-28 h-28 rounded-full bg-slate-700/50 border border-white/20 shadow-2xl flex items-center justify-center mb-4 backdrop-blur-md overflow-hidden">
-            <User className="w-16 h-16 text-white/70 mt-4" />
+            <img 
+              src="public/dorms.jpg" 
+              alt="Profilo Mari" 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback nel caso in cui l'immagine non venga trovata
+                e.target.onerror = null; 
+                e.target.src = "https://picsum.photos/seed/mari/200/200"; 
+              }}
+            />
           </div>
           
           <h2 className="text-3xl font-semibold text-white mb-8 tracking-wide drop-shadow-lg">
@@ -259,11 +284,11 @@ const App = () => {
         </div>
       ))}
 
-      {/* Surprise Jar Hearts (Effetto accumulo gravità) */}
+      {/* Surprise Jar Hearts & Flowers (Effetto accumulo gravità) */}
       {surpriseHearts.map(heart => (
         <div
           key={heart.id}
-          className="absolute text-red-500 animate-drop pointer-events-none drop-shadow-md"
+          className="absolute animate-drop pointer-events-none drop-shadow-md"
           style={{
             left: heart.left,
             bottom: heart.bottom,
@@ -273,7 +298,7 @@ const App = () => {
             '--rotation': `${heart.rotation}deg`
           }}
         >
-          ❤️
+          {heart.emoji}
         </div>
       ))}
 
@@ -296,7 +321,7 @@ const App = () => {
         {/* Intestazione Desktop */}
         <div className="absolute top-8 right-8 text-right hidden md:block opacity-60">
           <h1 className="text-4xl font-extrabold text-pink-400">MariOS</h1>
-          <p className="text-pink-500 font-medium">Versione Amore 1.0</p>
+          <p className="text-pink-500 font-medium">Versione 1.1</p>
         </div>
 
         <div className="flex flex-col flex-wrap h-full gap-4 sm:gap-6 content-start pt-4">
@@ -335,7 +360,11 @@ const App = () => {
 
       {/* Taskbar */}
       <div className="absolute bottom-0 w-full h-14 bg-white/70 backdrop-blur-lg flex items-center px-4 z-40 border-t border-white shadow-[0_-4px_20px_rgba(255,192,203,0.3)]">
-        <div className="flex items-center gap-2 cursor-pointer hover:bg-white/60 px-3 py-2 rounded-xl transition-colors">
+        <div 
+          onClick={handleLogout}
+          className="flex items-center gap-2 cursor-pointer hover:bg-white/60 px-3 py-2 rounded-xl transition-colors"
+          title="Disconnetti"
+        >
           <Heart className="text-pink-500 w-6 h-6 fill-current" /> 
           <span className="text-pink-800 font-bold tracking-wide hidden sm:inline">Inizio</span>
         </div>
@@ -361,30 +390,32 @@ const App = () => {
 
       {/* Window System */}
       {activeApp && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center p-4 sm:p-8 animate-pop pointer-events-none">
+        <div className={`absolute inset-0 flex items-center justify-center animate-pop pointer-events-none ${isFullscreen ? 'z-[100] p-0' : 'z-30 p-4 sm:p-8'}`}>
           {/* Backdrop (clicca fuori per chiudere) */}
-          <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-sm pointer-events-auto" onClick={() => setActiveApp(null)}></div>
+          <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-sm pointer-events-auto" onClick={() => !isFullscreen && setActiveApp(null)}></div>
           
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-3xl max-h-full flex flex-col pointer-events-auto border border-white overflow-hidden relative">
+          <div className={`flex flex-col pointer-events-auto overflow-hidden relative transition-all duration-300 ${isFullscreen ? 'w-full h-full bg-black/95 backdrop-blur-2xl' : 'bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-3xl max-h-full border border-white'}`}>
             
             {/* Window Title Bar */}
-            <div className="bg-gradient-to-r from-pink-50 to-purple-50 px-4 py-3 flex items-center justify-between border-b border-pink-100">
-              <div className="flex items-center gap-2">
-                <button onClick={() => setActiveApp(null)} className="w-3.5 h-3.5 rounded-full bg-red-400 hover:bg-red-500 shadow-inner flex items-center justify-center group"><X className="w-2 h-2 text-red-900 opacity-0 group-hover:opacity-100" /></button>
-                <div className="w-3.5 h-3.5 rounded-full bg-yellow-400 shadow-inner"></div>
-                <div className="w-3.5 h-3.5 rounded-full bg-green-400 shadow-inner"></div>
-                <span className="ml-3 font-bold text-slate-600 text-sm tracking-wide">
-                  {activeApp === 'reasons' && 'Motivi.app'}
-                  {activeApp === 'gallery' && 'Galleria.app'}
-                  {activeApp === 'music' && 'Musica.app'}
-                  {activeApp === 'counter' && 'Noi.app'}
-                  {activeApp === 'surprise' && 'Sorpresa.app'}
-                </span>
+            {!isFullscreen && (
+              <div className="bg-gradient-to-r from-pink-50 to-purple-50 px-4 py-3 flex items-center justify-between border-b border-pink-100">
+                <div className="flex items-center gap-2">
+                  <button onClick={() => { setActiveApp(null); setIsFullscreen(false); }} className="w-3.5 h-3.5 rounded-full bg-red-400 hover:bg-red-500 shadow-inner flex items-center justify-center group"><X className="w-2 h-2 text-red-900 opacity-0 group-hover:opacity-100" /></button>
+                  <div className="w-3.5 h-3.5 rounded-full bg-yellow-400 shadow-inner"></div>
+                  <div className="w-3.5 h-3.5 rounded-full bg-green-400 shadow-inner"></div>
+                  <span className="ml-3 font-bold text-slate-600 text-sm tracking-wide">
+                    {activeApp === 'reasons' && 'Motivi.app'}
+                    {activeApp === 'gallery' && 'Galleria.app'}
+                    {activeApp === 'music' && 'Musica.app'}
+                    {activeApp === 'counter' && 'Noi.app'}
+                    {activeApp === 'surprise' && 'Sorpresa.app'}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Window Content */}
-            <div className="p-6 md:p-10 overflow-y-auto flex-1 custom-scrollbar">
+            <div className={`overflow-y-auto flex-1 custom-scrollbar ${isFullscreen ? 'p-0 flex items-center justify-center' : 'p-6 md:p-10'}`}>
               
               {activeApp === 'reasons' && (
                 <div className="flex flex-col items-center">
@@ -409,26 +440,59 @@ const App = () => {
               )}
 
               {activeApp === 'gallery' && (
-                <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
-                  <h3 className="text-2xl font-bold text-pink-600 mb-6 flex items-center gap-2">
-                    <ImageIcon className="w-6 h-6 text-pink-500" /> I Nostri Momenti
-                  </h3>
+                <div className={`flex flex-col items-center w-full ${isFullscreen ? 'h-full justify-center' : 'max-w-2xl mx-auto'}`}>
+                  {!isFullscreen && (
+                    <h3 className="text-2xl font-bold text-pink-600 mb-6 flex items-center gap-2">
+                      <ImageIcon className="w-6 h-6 text-pink-500" /> I Nostri Momenti Più Belli
+                    </h3>
+                  )}
                   
-                  <div className="relative w-full bg-pink-50/50 rounded-3xl p-3 md:p-6 border border-pink-100 shadow-sm flex flex-col items-center">
+                  <div className={isFullscreen ? "relative w-full h-full flex flex-col items-center justify-center" : "relative w-full bg-pink-50/50 rounded-3xl p-3 md:p-6 border border-pink-100 shadow-sm flex flex-col items-center"}>
                     
+                    {isFullscreen && (
+                      <button 
+                        onClick={() => setIsFullscreen(false)} 
+                        className="absolute top-4 right-4 md:top-8 md:right-8 text-white/50 hover:text-white bg-white/10 p-3 rounded-full backdrop-blur-md z-50 transition-colors"
+                        title="Chiudi schermo intero"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    )}
+
                     {/* Contenitore Immagine con frecce */}
-                    <div className="relative w-full h-64 md:h-96 rounded-2xl overflow-hidden bg-black flex items-center justify-center group shadow-md border-4 border-white">
-                      <img 
-                        key={galleryIndex} // Il key forza il re-render e fa ripartire l'animazione animate-pop
-                        src={galleryImages[galleryIndex].src} 
-                        alt={`Ricordo ${galleryIndex + 1}`} 
-                        className="w-full h-full object-contain animate-pop"
-                      />
+                    <div className={`relative w-full overflow-hidden bg-black group shadow-md flex items-center justify-center ${isFullscreen ? 'h-full' : 'h-64 md:h-96 rounded-2xl border-4 border-white'}`}>
+                      
+                      {/* Nastro scorrevole delle immagini */}
+                      <div 
+                        className="flex transition-transform duration-500 ease-in-out h-full w-full"
+                        style={{ transform: `translateX(-${galleryIndex * 100}%)` }}
+                      >
+                        {galleryImages.map((image, idx) => (
+                          <div key={idx} className="w-full h-full flex-shrink-0 flex items-center justify-center">
+                            <img 
+                              src={image.src} 
+                              alt={`Ricordo ${idx + 1}`} 
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Pulsante Schermo Intero */}
+                      {!isFullscreen && (
+                        <button 
+                          onClick={() => setIsFullscreen(true)}
+                          className="absolute right-2 md:right-4 top-2 md:top-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-lg backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+                          title="Schermo intero"
+                        >
+                          <Maximize className="w-5 h-5" />
+                        </button>
+                      )}
                       
                       {/* Pulsante Precedente */}
                       <button 
                         onClick={prevImage}
-                        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110"
+                        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110 z-10"
                       >
                         <ChevronLeft className="w-6 h-6" />
                       </button>
@@ -436,27 +500,20 @@ const App = () => {
                       {/* Pulsante Successivo */}
                       <button 
                         onClick={nextImage}
-                        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110"
+                        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-pink-600 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transform hover:scale-110 z-10"
                       >
                         <ChevronRight className="w-6 h-6" />
                       </button>
                     </div>
 
-                    {/* Didascalia */}
-                    <div className="h-16 flex items-center justify-center mt-6">
-                      <p className="text-slate-700 text-lg md:text-xl font-medium text-center animate-pop" key={`desc-${galleryIndex}`}>
-                        {galleryImages[galleryIndex].caption}
-                      </p>
-                    </div>
-
                     {/* Indicatori (Pallini) */}
-                    <div className="flex gap-2 mt-4 flex-wrap justify-center">
+                    <div className={`flex gap-4 flex-wrap justify-center ${isFullscreen ? 'absolute bottom-8' : 'mt-6'}`}>
                       {galleryImages.map((_, idx) => (
                         <button
                           key={idx}
                           onClick={() => setGalleryIndex(idx)}
                           className={`h-2.5 rounded-full transition-all duration-300 ${
-                            idx === galleryIndex ? 'bg-pink-500 w-8' : 'bg-pink-200 hover:bg-pink-400 w-2.5'
+                            idx === galleryIndex ? (isFullscreen ? 'bg-white w-8' : 'bg-pink-500 w-8') : (isFullscreen ? 'bg-white/50 hover:bg-white w-2.5' : 'bg-pink-200 hover:bg-pink-400 w-2.5')
                           }`}
                           aria-label={`Vai all'immagine ${idx + 1}`}
                         />
