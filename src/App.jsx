@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Heart, Star, Sparkles, Camera, Coffee, Smile, Music, Gift, Lock, User, ArrowRight, X, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Maximize, Minimize } from 'lucide-react';
+import { Heart, Star, Sparkles, Camera, Coffee, Smile, Music, Gift, Lock, User, ArrowRight, X, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Maximize, Minimize, Flame, PawPrint, Zap, Crown, Triangle } from 'lucide-react';
 
 // Stili personalizzati per le animazioni dei cuori fluttuanti
 const customStyles = `
@@ -46,6 +46,15 @@ const customStyles = `
     animation: sway 6s ease-in-out infinite;
     transform-origin: bottom center;
   }
+
+  @keyframes puffOut {
+    0% { transform: scale(1); opacity: 0.9; filter: blur(0px); }
+    100% { transform: scale(1.5); opacity: 0; filter: blur(5px); }
+  }
+
+  .animate-puff-out {
+    animation: puffOut 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  }
 `;
 
 // Spostato FUORI dal componente App per evitare bug di re-rendering ad ogni secondo dell'orologio
@@ -62,10 +71,16 @@ const DesktopIcon = ({ icon: Icon, label, onClick, color }) => (
 );
 
 const reasons = [
-  { text: "Hai il sorriso più bello dell'universo", icon: <Smile className="text-pink-500 w-8 h-8" /> },
-  { text: "Rendi ogni giorno un'avventura speciale", icon: <Star className="text-yellow-400 w-8 h-8" /> },
+  { text: "Hai il sorriso più bello del mondo", icon: <Smile className="text-pink-500 w-8 h-8" /> },
+  { text: "Solo guardarti mi fa sorridere", icon: <Star className="text-yellow-400 w-8 h-8" /> },
   { text: "Sopporti le mie battute pessime (quasi sempre)", icon: <Coffee className="text-amber-700 w-8 h-8" /> },
   { text: "Sei la mia persona preferita con cui fare nulla", icon: <Heart className="text-red-500 w-8 h-8" /> },
+  { text: "Non sai fare le patatine fritte", icon: <Flame className="text-orange-500 w-8 h-8" /> },
+  { text: "Chanel", icon: <PawPrint className="text-stone-600 w-8 h-8" /> },
+  { text: "Sei pazzerella", icon: <Zap className="text-yellow-500 w-8 h-8 fill-yellow-500" /> },
+  { text: "Mi fai sentire il più figo del mondo", icon: <Crown className="text-amber-500 w-8 h-8" /> },
+  { text: "Il tuo nasino a triangolo", icon: <Triangle className="text-pink-400 w-8 h-8 fill-pink-400" /> },
+  { text: "Le tue labbra a cuore", icon: <Heart className="text-red-600 w-8 h-8 fill-red-600" /> },
   { text: "Perché sei semplicemente tu.", icon: <Sparkles className="text-purple-500 w-8 h-8" /> }
 ];
 
@@ -77,6 +92,7 @@ const App = () => {
   const [showMessage, setShowMessage] = useState(false);
   const [hearts, setHearts] = useState([]);
   const [surpriseHearts, setSurpriseHearts] = useState([]); // Nuovo stato per i cuori a cascata
+  const [extraTulips, setExtraTulips] = useState([]); // Stato per i tulipani spawnati al click
   const [reasonIndex, setReasonIndex] = useState(0);
 
   // Nuovi stati per il Desktop
@@ -152,6 +168,7 @@ const App = () => {
     setActiveApp(null);
     setShowMessage(false);
     setSurpriseHearts([]);
+    setExtraTulips([]);
     setIsFullscreen(false);
   };
 
@@ -215,6 +232,30 @@ const App = () => {
       });
     }
     setSurpriseHearts(newHearts);
+  };
+
+  const handleTulipClick = () => {
+    const tulipId = Math.random();
+    const newTulip = {
+      id: tulipId,
+      left: Math.random() * 90, // Posizione orizzontale casuale (0% - 90%)
+      bottom: Math.random() * 70 + 10, // Posizione verticale casuale sopra la barra (10% - 80%)
+      size: Math.random() * 60 + 60, // Grandezza casuale (60px - 120px)
+      rotation: Math.random() * 40 - 20, // Rotazione casuale (-20deg a 20deg)
+      leaving: false // Stato per gestire l'animazione di scomparsa a "puff"
+    };
+    
+    setExtraTulips(prev => [...prev, newTulip]);
+    
+    // Avvia l'animazione puff dopo 4.5 secondi
+    setTimeout(() => {
+      setExtraTulips(prev => prev.map(t => t.id === tulipId ? { ...t, leaving: true } : t));
+    }, 4500);
+
+    // Rimuovi completamente il tulipano dal DOM dopo 5 secondi (a fine animazione)
+    setTimeout(() => {
+      setExtraTulips(prev => prev.filter(t => t.id !== tulipId));
+    }, 5000);
   };
 
   const nextReason = () => {
@@ -325,9 +366,37 @@ const App = () => {
           {heart.emoji}
         </div>
       ))}
+      
+      {/* Tulipani aggiuntivi spawnati al click */}
+      {extraTulips.map(tulip => (
+        <div
+          key={tulip.id}
+          className={`absolute z-20 pointer-events-none ${tulip.leaving ? 'animate-puff-out' : 'animate-pop'}`}
+          style={{
+            left: `${tulip.left}%`,
+            bottom: `${tulip.bottom}%`,
+            width: `${tulip.size}px`
+          }}
+        >
+          <img 
+            src="tulipano.png" 
+            alt="Tulipano Extra" 
+            className="w-full object-contain opacity-90 drop-shadow-[0_8px_12px_rgba(236,72,153,0.3)]"
+            style={{ transform: `rotate(${tulip.rotation}deg)` }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://cdn3.iconfinder.com/data/icons/spring-23/32/tulip-flower-spring-nature-floral-512.png";
+            }}
+          />
+        </div>
+      ))}
 
-      {/* Tulipano in basso a destra */}
-      <div className="absolute bottom-14 right-2 md:right-8 z-20 pointer-events-none animate-sway">
+      {/* Tulipano principale in basso a destra (Ora Cliccabile!) */}
+      <div 
+        onClick={handleTulipClick}
+        title="Clicca per far fiorire il desktop!"
+        className="absolute bottom-14 right-2 md:right-8 z-20 cursor-pointer hover:scale-105 hover:brightness-110 active:scale-95 transition-all duration-300 animate-sway"
+      >
         <img 
           src="tulipano.png" 
           alt="Tulipano" 
@@ -341,14 +410,14 @@ const App = () => {
       </div>
 
       {/* Desktop Area */}
-      <div className="relative z-10 p-4 sm:p-8 h-[calc(100vh-3rem)]">
+      <div className="relative z-10 p-4 sm:p-8 h-[calc(100vh-3rem)] pointer-events-none">
         {/* Intestazione Desktop */}
         <div className="absolute top-8 right-8 text-right hidden md:block opacity-60">
           <h1 className="text-4xl font-extrabold text-pink-400">MariOS</h1>
           <p className="text-pink-500 font-medium">Versione 1.0</p>
         </div>
 
-        <div className="flex flex-col flex-wrap h-full gap-4 sm:gap-6 content-start pt-4">
+        <div className="flex flex-col flex-wrap h-full gap-4 sm:gap-6 content-start pt-4 pointer-events-auto">
           <DesktopIcon 
             icon={Heart} 
             label="Motivi" 
@@ -568,9 +637,6 @@ const App = () => {
                       src="https://embed.music.apple.com/it/playlist/pl.u-AkAm8ENs2LPLR5q"
                     ></iframe>
                   </div>
-                  <p className="text-purple-700 mt-6 text-center font-medium">
-                    Tutte le canzoni che mi fanno pensare a te 🎧❤️
-                  </p>
                 </div>
               )}
 
