@@ -89,16 +89,16 @@ const App = () => {
 
   // Array di immagini per la galleria (senza caption, ordine casuale con aura.jpg per ultimo)
   const galleryImages = [
-    { src: "public/birs.jpg" },
-    { src: "public/marispa.jpg" },
+    { src: "birs.jpg" },
+    { src: "marispa.jpg" },
     { src: "bacios.jpg" },
-    { src: "public/dorms.jpg" },
-    { src: "public/figa.jpg" },
-    { src: "public/romaspecchio.jpg" },
-    { src: "public/cols.jpg" },
-    { src: "public/bershka.jpg" },
-    { src: "public/duoms.jpg" },
-    { src: "public/boh.jpg" },
+    { src: "dorms.jpg" },
+    { src: "figa.jpg" },
+    { src: "romaspecchio.jpg" },
+    { src: "cols.jpg" },
+    { src: "bershka.jpg" },
+    { src: "duoms.jpg" },
+    { src: "boh.jpg" },
     { src: "aura.jpg" }
   ];
 
@@ -212,7 +212,7 @@ const App = () => {
           {/* Avatar utente */}
           <div className="w-28 h-28 rounded-full bg-slate-700/50 border border-white/20 shadow-2xl flex items-center justify-center mb-4 backdrop-blur-md overflow-hidden">
             <img 
-              src="public/dorms.jpg" 
+              src="dorms.jpg" 
               alt="Profilo Mari" 
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -321,7 +321,7 @@ const App = () => {
         {/* Intestazione Desktop */}
         <div className="absolute top-8 right-8 text-right hidden md:block opacity-60">
           <h1 className="text-4xl font-extrabold text-pink-400">MariOS</h1>
-          <p className="text-pink-500 font-medium">Versione 1.1</p>
+          <p className="text-pink-500 font-medium">Versione 1.0</p>
         </div>
 
         <div className="flex flex-col flex-wrap h-full gap-4 sm:gap-6 content-start pt-4">
