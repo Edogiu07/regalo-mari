@@ -375,7 +375,7 @@ const App = () => {
                 <div className="w-3.5 h-3.5 rounded-full bg-green-400 shadow-inner"></div>
                 <span className="ml-3 font-bold text-slate-600 text-sm tracking-wide">
                   {activeApp === 'reasons' && 'Motivi.app'}
-                  {activeApp === 'gallery' && 'Foto.app'}
+                  {activeApp === 'gallery' && 'Galleria.app'}
                   {activeApp === 'music' && 'Musica.app'}
                   {activeApp === 'counter' && 'Noi.app'}
                   {activeApp === 'surprise' && 'Sorpresa.app'}
